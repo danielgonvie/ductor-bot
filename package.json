@@ -1,0 +1,22 @@
+{
+  "name": "ductor-bot",
+  "version": "0.0.1",
+  "description": "a personal discord bot for fun purposes",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "danielgonvie@gmail.com",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/voice": "^0.14.0",
+    "discord.js": "^14.7.1",
+    "dotenv": "^16.0.3",
+    "youtube-dl-exec": "^2.1.11"
+  },
+  "devDependencies": {
+    "eslint": "^8.32.0",
+    "nodemon": "^2.0.20"
+  }
+}
