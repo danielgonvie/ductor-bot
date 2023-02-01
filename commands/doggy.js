@@ -10,7 +10,6 @@ module.exports = {
 		fetch('https://api.alexflipnote.dev/dogs')
 			.then(res => res.json())
 			.then(async res => {
-				console.log(res);
 				await interaction.reply({ embeds:[new EmbedBuilder().setColor('Aqua').setImage(res.file)] });
 			});
 

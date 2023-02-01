@@ -10,7 +10,6 @@ module.exports = {
 		fetch('https://api.alexflipnote.dev/birb')
 			.then(res => res.json())
 			.then(async res => {
-				console.log(res);
 				await interaction.reply({ embeds:[new EmbedBuilder().setColor('DarkGold').setImage(res.file)] });
 			});
 
