@@ -1,9 +1,9 @@
 const { SlashCommandBuilder } = require('discord.js');
+const { playlist, player } = require('../global');
 
 const { joinVoiceChannel, createAudioPlayer, createAudioResource, VoiceConnectionStatus, AudioPlayerStatus } = require('@discordjs/voice');
 const play = require('play-dl');
-const player = createAudioPlayer();
-const playlist = [];
+
 let isPlaying = false;
 
 player.on('error', error => {
@@ -14,9 +14,10 @@ player.on(AudioPlayerStatus.Idle, async () => {
 	playlist.shift();
 	isPlaying = false;
 
-	console.log('aqui ponemos el siguiente', playlist);
+	if (playlist.length > 0) {
+		player.play(playlist[0]);
+	}
 
-	player.play(playlist[0]);
 });
 
 player.on(AudioPlayerStatus.Playing, () => {
@@ -25,7 +26,7 @@ player.on(AudioPlayerStatus.Playing, () => {
 
 });
 player.on(AudioPlayerStatus.Paused, () => {
-	console.log('audio pausaoo');
+	console.log('audio paused');
 
 });
 player.on(AudioPlayerStatus.Buffering, () => {
@@ -61,45 +62,30 @@ module.exports = {
 				content: 'Tienes que estar unido a un canal de voz para poder usar ese comando.',
 			});
 		}
+
 		const connection = joinVoiceChannel({
 			channelId: interaction.member.voice.channel.id,
 			guildId: `${interaction.guildId}`,
 			adapterCreator: interaction.guild.voiceAdapterCreator,
 		});
+
 		const subscription = connection.subscribe(player);
 
-		connection.on('stateChange', (oldState, newState) => {
-			console.log(`Connection transitioned from ${oldState.status} to ${newState.status}`);
-		});
 		connection.on(VoiceConnectionStatus.Disconnected, () => {
-			console.log('The connection has entered the Diconected state!');
 			player.stop();
-		});
-
-		connection.on(VoiceConnectionStatus.Destroyed, () => {
-			console.log('The connection has entered the Destroyed state!');
-			player.stop();
-			connection.disconnect();
-		});
-
-		connection.on(VoiceConnectionStatus.Ready, () => {
-			console.log('entra aqui', playlist);
 		});
 
 		await interaction.reply('Searching for the song...');
-		console.log(interaction.options._hoistedOptions[0].value, 'voooooooooooooooooooooooooooooooooooy2');
 
 		const yt_info = await play.search(interaction.options._hoistedOptions[0].value, {
 			limit: 1,
 		});
-		console.log(yt_info[0].url, 'voooooooooooooooooooooooooooooooooooy');
 		const stream = await play.stream(yt_info[0].url);
 		playlist.push(createAudioResource(stream.stream, {
 			inputType: stream.type,
 		}));
-		console.log(playlist);
 		isPlaying ? console.log(playlist, 'añadido a la queue') : player.play(playlist[0]);
-		interaction.editReply(` ${yt_info[0].title} (${yt_info[0].durationRaw}) -> **Added to queue! There are ${playlist.length} songs on queue NOT WORKING**`);
+		interaction.editReply(` **${yt_info[0].title}** (${yt_info[0].durationRaw}) -> Added to queue! There are **${playlist.length}** songs on queue`);
 
 	},
 };
