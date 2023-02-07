@@ -19,9 +19,7 @@
     "fs": "^0.0.1-security",
     "node-fetch": "^3.3.0",
     "play-dl": "^1.9.6",
-    "sodium": "^3.0.2",
-    "youtube-dl-exec": "^2.1.11",
-    "ytdl-core": "^4.11.2"
+    "sodium": "^3.0.2"
   },
   "devDependencies": {
     "eslint": "^8.32.0",
