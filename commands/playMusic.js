@@ -36,6 +36,8 @@ player.on(AudioPlayerStatus.Buffering, () => {
 
 player.on(AudioPlayerStatus.AutoPaused, () => {
 	console.log('audio autopaused');
+	player.play();
+
 
 });
 
@@ -76,11 +78,16 @@ module.exports = {
 		});
 
 		await interaction.reply('Searching for the song...');
+		console.log('1<<', interaction.options);
+		console.log('2<<', interaction.options._hoistedOptions);
+		console.log('<<<', interaction.options._hoistedOptions[0].value);
 
 		const yt_info = await play.search(interaction.options._hoistedOptions[0].value, {
 			limit: 1,
 		});
+		console.log('>>>', yt_info);
 		const stream = await play.stream(yt_info[0].url);
+		console.log(stream, 'lol');
 		playlist.push(createAudioResource(stream.stream, {
 			inputType: stream.type,
 		}));
