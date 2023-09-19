@@ -1,6 +1,9 @@
-const { createAudioPlayer } = require('@discordjs/voice');
-
+const { createAudioPlayer, NoSubscriberBehavior } = require('@discordjs/voice');
 module.exports = {
-  playlist: [],
-  player: createAudioPlayer(),
+	playlist: [],
+	player: createAudioPlayer({
+		behaviors: {
+			noSubscriber: NoSubscriberBehavior.Play,
+		},
+	}),
 };

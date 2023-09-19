@@ -10,7 +10,7 @@ module.exports = {
 		playlist.shift();
 
 		if (playlist.length > 0) {
-			player.play(playlist[0]);
+			player.play(playlist[0].audioSource);
 			await interaction.reply('Playing next song!');
 		}
 		else {

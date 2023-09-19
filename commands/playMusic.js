@@ -15,7 +15,7 @@ player.on(AudioPlayerStatus.Idle, async () => {
 	isPlaying = false;
 
 	if (playlist.length > 0) {
-		player.play(playlist[0]);
+		player.play(playlist[0].audioSource);
 	}
 
 });
@@ -36,8 +36,6 @@ player.on(AudioPlayerStatus.Buffering, () => {
 
 player.on(AudioPlayerStatus.AutoPaused, () => {
 	console.log('audio autopaused');
-	player.play();
-
 
 });
 
@@ -71,28 +69,30 @@ module.exports = {
 			adapterCreator: interaction.guild.voiceAdapterCreator,
 		});
 
-		const subscription = connection.subscribe(player);
 
 		connection.on(VoiceConnectionStatus.Disconnected, () => {
 			player.stop();
 		});
 
 		await interaction.reply('Searching for the song...');
-		console.log('1<<', interaction.options);
-		console.log('2<<', interaction.options._hoistedOptions);
-		console.log('<<<', interaction.options._hoistedOptions[0].value);
 
 		const yt_info = await play.search(interaction.options._hoistedOptions[0].value, {
 			limit: 1,
 		});
-		console.log('>>>', yt_info);
-		const stream = await play.stream(yt_info[0].url);
-		console.log(stream, 'lol');
-		playlist.push(createAudioResource(stream.stream, {
-			inputType: stream.type,
-		}));
-		isPlaying ? console.log(playlist, 'añadido a la queue') : player.play(playlist[0]);
-		interaction.editReply(` **${yt_info[0].title}** (${yt_info[0].durationRaw}) -> Added to queue! There are **${playlist.length}** songs on queue`);
+		if (yt_info.length > 0) {
+			const stream = await play.stream(yt_info[0].url);
+			playlist.push({ name: yt_info[0].title, audioSource: createAudioResource(stream.stream, {
+				inputType: stream.type,
+			}), requestedBy: interaction.member.nickname });
+			isPlaying ? console.log(playlist, 'añadido a la queue') : player.play(playlist[0].audioSource);
+			interaction.editReply(` **${yt_info[0].title}** (${yt_info[0].durationRaw}) -> Added to queue! There are **${playlist.length}** songs on queue`);
+
+			connection.subscribe(player);
+		}
+		else {
+			interaction.editReply(' **OOPS!** Youtube playlist and shorts are not supported yet, try again with just the song');
+		}
+
 
 	},
 };
