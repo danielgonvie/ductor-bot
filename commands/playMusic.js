@@ -23,20 +23,16 @@ player.on(AudioPlayerStatus.Idle, async () => {
 player.on(AudioPlayerStatus.Playing, () => {
 	console.log('audio playing');
 	isPlaying = true;
-
 });
 player.on(AudioPlayerStatus.Paused, () => {
 	console.log('audio paused');
-
 });
 player.on(AudioPlayerStatus.Buffering, () => {
 	console.log('audio buffering');
-
 });
 
 player.on(AudioPlayerStatus.AutoPaused, () => {
 	console.log('audio autopaused');
-
 });
 
 
