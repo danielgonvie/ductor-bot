@@ -1,10 +1,23 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { playlist, player } = require('../global');
 
-const { joinVoiceChannel, createAudioPlayer, createAudioResource, VoiceConnectionStatus, AudioPlayerStatus } = require('@discordjs/voice');
+const { joinVoiceChannel, createAudioResource, VoiceConnectionStatus, AudioPlayerStatus, voice } = require('@discordjs/voice');
 const play = require('play-dl');
 
 let isPlaying = false;
+let myTimer;
+
+
+// Function to delete the timer
+function deleteTimer() {
+	if (myTimer) {
+		clearTimeout(myTimer); // Cancel the timer
+		console.log('Timer deleted.');
+	}
+	else {
+		console.log('No timer to delete.');
+	}
+}
 
 player.on('error', error => {
 	console.error('Error:', error.message, 'with track', error.resource.metadata.title);
@@ -23,16 +36,20 @@ player.on(AudioPlayerStatus.Idle, async () => {
 player.on(AudioPlayerStatus.Playing, () => {
 	console.log('audio playing');
 	isPlaying = true;
+
 });
 player.on(AudioPlayerStatus.Paused, () => {
 	console.log('audio paused');
+	deleteTimer();
 });
 player.on(AudioPlayerStatus.Buffering, () => {
 	console.log('audio buffering');
+	deleteTimer();
 });
 
 player.on(AudioPlayerStatus.AutoPaused, () => {
 	console.log('audio autopaused');
+	deleteTimer();
 });
 
 
@@ -75,6 +92,7 @@ module.exports = {
 		const yt_info = await play.search(interaction.options._hoistedOptions[0].value, {
 			limit: 1,
 		});
+
 		if (yt_info.length > 0) {
 			const stream = await play.stream(yt_info[0].url);
 			playlist.push({ name: yt_info[0].title, audioSource: createAudioResource(stream.stream, {
@@ -89,6 +107,10 @@ module.exports = {
 			interaction.editReply(' **OOPS!** Youtube playlist and shorts are not supported yet, try again with just the song');
 		}
 
+		myTimer = setTimeout(() => {
+			console.log('empeiza la cuenta atras');
+			connection.disconnect();
+		}, (yt_info[0].durationInSec * 1000) + 60000);
 
 	},
 };
