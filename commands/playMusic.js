@@ -102,15 +102,15 @@ module.exports = {
 			interaction.editReply(` **${yt_info[0].title}** (${yt_info[0].durationRaw}) -> Added to queue! There are **${playlist.length}** songs on queue`);
 
 			connection.subscribe(player);
+			deleteTimer();
+			myTimer = setTimeout(() => {
+				connection.disconnect();
+			}, (yt_info[0].durationInSec * 1000) + 60000);
 		}
 		else {
 			interaction.editReply(' **OOPS!** Youtube playlist and shorts are not supported yet, try again with just the song');
 		}
 
-		myTimer = setTimeout(() => {
-			console.log('empeiza la cuenta atras');
-			connection.disconnect();
-		}, (yt_info[0].durationInSec * 1000) + 60000);
 
 	},
 };
