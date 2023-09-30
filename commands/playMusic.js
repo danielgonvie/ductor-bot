@@ -104,7 +104,7 @@ module.exports = {
 			connection.subscribe(player);
 			deleteTimer();
 			myTimer = setTimeout(() => {
-				connection.disconnect();
+				if (!isPlaying) {connection.disconnect();}
 			}, (yt_info[0].durationInSec * 1000) + 60000);
 		}
 		else {
