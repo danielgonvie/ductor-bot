@@ -1,22 +1,17 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { playlist, player } = require('../global');
 
-const { joinVoiceChannel, createAudioResource, VoiceConnectionStatus, AudioPlayerStatus, voice } = require('@discordjs/voice');
+const { joinVoiceChannel, createAudioResource, VoiceConnectionStatus, AudioPlayerStatus } = require('@discordjs/voice');
 const play = require('play-dl');
 
 let isPlaying = false;
-let myTimer;
 
-
-// Function to delete the timer
-function deleteTimer() {
-	if (myTimer) {
-		clearTimeout(myTimer); // Cancel the timer
-		console.log('Timer deleted.');
+function parseYoutubeUrl(url) {
+	if (url.includes('shorts')) {
+		url.replace('shorts/', 'watch?v=');
 	}
-	else {
-		console.log('No timer to delete.');
-	}
+	const fragments = url.split('&');
+	return fragments[0];
 }
 
 player.on('error', error => {
@@ -40,16 +35,16 @@ player.on(AudioPlayerStatus.Playing, () => {
 });
 player.on(AudioPlayerStatus.Paused, () => {
 	console.log('audio paused');
-	deleteTimer();
+
 });
 player.on(AudioPlayerStatus.Buffering, () => {
 	console.log('audio buffering');
-	deleteTimer();
+
 });
 
 player.on(AudioPlayerStatus.AutoPaused, () => {
 	console.log('audio autopaused');
-	deleteTimer();
+
 });
 
 
@@ -58,7 +53,7 @@ module.exports = {
 		.setName('play')
 		.setDescription('Plays some music on current channel you are on')
 		.setDescriptionLocalizations({
-			'es-ES': 'Ponga una rolita!',
+			'es-ES': 'Pon música en tu canal actual!',
 		})
 		.addStringOption(query =>
 			query.setName('youtube-song')
@@ -67,21 +62,24 @@ module.exports = {
 					'es-ES': 'Añade el link o el nombre de la canción',
 				})
 				.setRequired(true)),
+
 	async execute(interaction) {
 
+		// Check if user is in a current voiceChannel
 		if (!interaction.member.voice.channel.id) {
 			return await interaction.reply({
 				ephemeral: true,
-				content: 'Tienes que estar unido a un canal de voz para poder usar ese comando.',
+				content: 'You must be joined to one channel to use this command.',
 			});
 		}
 
+
+		// Connection and feedback to the user
 		const connection = joinVoiceChannel({
 			channelId: interaction.member.voice.channel.id,
 			guildId: `${interaction.guildId}`,
 			adapterCreator: interaction.guild.voiceAdapterCreator,
 		});
-
 
 		connection.on(VoiceConnectionStatus.Disconnected, () => {
 			player.stop();
@@ -89,7 +87,12 @@ module.exports = {
 
 		await interaction.reply('Searching for the song...');
 
-		const yt_info = await play.search(interaction.options._hoistedOptions[0].value, {
+		// Logic based on users request
+		console.log({ url: interaction.options._hoistedOptions[0].value });
+		const query = parseYoutubeUrl(interaction.options._hoistedOptions[0].value);
+		console.log({ query });
+
+		const yt_info = await play.search(query, {
 			limit: 1,
 		});
 
@@ -102,10 +105,6 @@ module.exports = {
 			interaction.editReply(` **${yt_info[0].title}** (${yt_info[0].durationRaw}) -> Added to queue! There are **${playlist.length}** songs on queue`);
 
 			connection.subscribe(player);
-			deleteTimer();
-			myTimer = setTimeout(() => {
-				if (!isPlaying) {connection.disconnect();}
-			}, (yt_info[0].durationInSec * 1000) + 60000);
 		}
 		else {
 			interaction.editReply(' **OOPS!** Youtube playlist and shorts are not supported yet, try again with just the song');
